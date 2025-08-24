@@ -1,42 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Hotel Bi Nacional Design System - Premium hotel management interface */
 
 @layer base {
   :root {
+    /* Hotel brand colors - Red, Navy Blue, White gradients */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 220 13% 18%;
 
+    /* Hotel Red Primary */
+    --hotel-red: 0 84% 60%;
+    --hotel-red-light: 0 76% 72%;
+    --hotel-red-dark: 0 85% 45%;
+
+    /* Hotel Navy Blue */
+    --hotel-navy: 221 83% 18%;
+    --hotel-navy-light: 221 69% 35%;
+    --hotel-navy-dark: 221 100% 12%;
+
+    /* Neutral shades */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 13% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 13% 18%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 221 83% 18%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 13% 18%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 8.9% 46.1%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 0 84% 60%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --warning: 45 93% 58%;
+    --warning-foreground: 45 30% 18%;
 
-    --radius: 0.5rem;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 18%;
+
+    --radius: 0.75rem;
+
+    /* Hotel-specific gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--hotel-red)), hsl(var(--hotel-navy)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--hotel-navy)), hsl(var(--hotel-red)));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 14% 98%));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--hotel-red)) 0%, hsl(221 69% 35%) 50%, hsl(var(--hotel-navy)) 100%);
+
+    /* Shadows */
+    --shadow-hotel: 0 10px 30px -10px hsl(var(--hotel-navy) / 0.3);
+    --shadow-card: 0 4px 20px -4px hsl(220 13% 18% / 0.1);
+    --shadow-glow: 0 0 40px hsl(var(--hotel-red) / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +133,74 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-['Inter',sans-serif];
+  }
+}
+
+@layer components {
+  /* Hotel-specific component styles */
+  .hotel-gradient-bg {
+    background: var(--gradient-hero);
+  }
+
+  .hotel-card {
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+  }
+
+  .hotel-card:hover {
+    box-shadow: var(--shadow-hotel);
+    transform: translateY(-2px);
+  }
+
+  .room-occupied {
+    background: linear-gradient(135deg, hsl(var(--hotel-red)), hsl(var(--hotel-red-light)));
+    color: hsl(var(--accent-foreground));
+  }
+
+  .room-available {
+    background: linear-gradient(135deg, hsl(var(--success)), hsl(142 76% 45%));
+    color: hsl(var(--success-foreground));
+  }
+
+  .room-maintenance {
+    background: linear-gradient(135deg, hsl(var(--warning)), hsl(45 93% 65%));
+    color: hsl(var(--warning-foreground));
+  }
+
+  .room-cleaning {
+    background: linear-gradient(135deg, hsl(221 69% 35%), hsl(var(--hotel-navy-light)));
+    color: hsl(var(--primary-foreground));
+  }
+
+  .currency-widget {
+    background: var(--gradient-card);
+    border: 1px solid hsl(var(--border));
+    transition: var(--transition-smooth);
+  }
+
+  .currency-widget:hover {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .sidebar-item {
+    transition: var(--transition-bounce);
+  }
+
+  .sidebar-item:hover {
+    background: linear-gradient(90deg, hsl(var(--hotel-red) / 0.1), transparent);
+  }
+
+  .dashboard-card {
+    background: var(--gradient-card);
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+  }
+
+  .dashboard-card:hover {
+    box-shadow: var(--shadow-hotel);
+    border-color: hsl(var(--hotel-red) / 0.3);
   }
 }
