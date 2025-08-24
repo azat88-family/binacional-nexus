@@ -67,7 +67,7 @@ const CurrencyWidget: React.FC = () => {
             </div>
           </div>
         ))}
-        <div className="pt-2 border-t border-white/20">
+        <div className="pt-2 border-t border-black/20">
           <div className="text-xs text-white/60 text-center">
             Base: 1 USD
           </div>
