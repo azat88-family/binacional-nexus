@@ -56,11 +56,16 @@
 
     --radius: 0.75rem;
 
-    /* Hotel-specific gradients */
+    /* Hotel-specific gradients - Modern Dark Abstract */
     --gradient-primary: linear-gradient(135deg, hsl(var(--hotel-red)), hsl(var(--hotel-navy)));
     --gradient-secondary: linear-gradient(135deg, hsl(var(--hotel-navy)), hsl(var(--hotel-red)));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 14% 98%));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--hotel-red)) 0%, hsl(221 69% 35%) 50%, hsl(var(--hotel-navy)) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220 15% 8%) 0%, hsl(var(--hotel-navy) / 0.9) 35%, hsl(var(--hotel-red) / 0.1) 75%, hsl(220 15% 6%) 100%);
+    --gradient-abstract: 
+      radial-gradient(circle at 20% 80%, hsl(var(--hotel-red) / 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(var(--hotel-navy) / 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, hsl(var(--hotel-red) / 0.1) 0%, transparent 50%),
+      linear-gradient(135deg, hsl(220 15% 4%) 0%, hsl(220 20% 8%) 100%);
 
     /* Shadows */
     --shadow-hotel: 0 10px 30px -10px hsl(var(--hotel-navy) / 0.3);
@@ -140,7 +145,21 @@
 @layer components {
   /* Hotel-specific component styles */
   .hotel-gradient-bg {
-    background: var(--gradient-hero);
+    background: var(--gradient-abstract);
+    position: relative;
+  }
+  
+  .hotel-gradient-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      linear-gradient(45deg, transparent 30%, hsl(var(--hotel-red) / 0.05) 50%, transparent 70%),
+      linear-gradient(-45deg, transparent 30%, hsl(var(--hotel-navy) / 0.05) 50%, transparent 70%);
+    pointer-events: none;
   }
 
   .hotel-card {

@@ -45,40 +45,39 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4 relative"
-      style={{
-        backgroundImage: `linear-gradient(135deg, rgba(220, 38, 38, 0.8), rgba(30, 58, 138, 0.8)), url(${hotelLobby})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
+    <div className="min-h-screen hotel-gradient-bg flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Abstract geometric elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-hotel-red/10 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-hotel-navy/15 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-hotel-red/5 via-transparent to-hotel-navy/5 rounded-full blur-3xl"></div>
+      </div>
       <div className="w-full max-w-md space-y-6">
         {/* Language Selector */}
-        <div className="flex justify-center">
+        <div className="flex justify-center relative z-10">
           <Select value={language} onValueChange={(value: 'es' | 'pt') => setLanguage(value)}>
-            <SelectTrigger className="w-32 bg-white/10 border-white/20 text-white backdrop-blur-sm">
+            <SelectTrigger className="w-32 bg-black/20 border-white/10 text-white backdrop-blur-md hover:bg-black/30 transition-all">
               <Languages className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="es">Español</SelectItem>
-              <SelectItem value="pt">Português</SelectItem>
+            <SelectContent className="bg-black/90 border-white/10 backdrop-blur-md">
+              <SelectItem value="es" className="text-white hover:bg-white/10">Español</SelectItem>
+              <SelectItem value="pt" className="text-white hover:bg-white/10">Português</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Login Card */}
-        <Card className="hotel-card border-white/20 backdrop-blur-sm bg-white/95">
+        <Card className="hotel-card border-white/10 backdrop-blur-xl bg-black/40 shadow-2xl relative z-10">
           <CardHeader className="text-center space-y-4">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-hotel-red to-hotel-navy rounded-full flex items-center justify-center shadow-lg">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-hotel-red to-hotel-navy rounded-full flex items-center justify-center shadow-lg ring-2 ring-white/10">
               <Hotel className="w-8 h-8 text-white" />
             </div>
             <div>
               <CardTitle className="text-2xl font-bold bg-gradient-to-r from-hotel-red to-hotel-navy bg-clip-text text-transparent">
                 {t('hotel.name')}
               </CardTitle>
-              <CardDescription className="text-muted-foreground mt-2">
+              <CardDescription className="text-white/70 mt-2">
                 {t('login.subtitle')}
               </CardDescription>
             </div>
@@ -87,41 +86,43 @@ const LoginPage: React.FC = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="role" className="text-sm font-medium">
+                <Label htmlFor="role" className="text-sm font-medium text-white">
                   Tipo de Usuario
                 </Label>
                 <Select value={role} onValueChange={(value: UserRole) => setRole(value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm">
                     <User className="w-4 h-4 mr-2" />
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="owner">{t('login.owner')}</SelectItem>
-                    <SelectItem value="attendant">{t('login.attendant')}</SelectItem>
+                  <SelectContent className="bg-black/90 border-white/10 backdrop-blur-md">
+                    <SelectItem value="owner" className="text-white hover:bg-white/10">{t('login.owner')}</SelectItem>
+                    <SelectItem value="attendant" className="text-white hover:bg-white/10">{t('login.attendant')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="username">{t('login.username')}</Label>
+                <Label htmlFor="username" className="text-white">{t('login.username')}</Label>
                 <Input
                   id="username"
                   type="text"
                   placeholder={t('login.username')}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 backdrop-blur-sm"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">{t('login.password')}</Label>
+                <Label htmlFor="password" className="text-white">{t('login.password')}</Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder={t('login.password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 backdrop-blur-sm"
                   required
                 />
               </div>
@@ -137,8 +138,8 @@ const LoginPage: React.FC = () => {
             </form>
 
             {/* Demo credentials info */}
-            <div className="mt-6 p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground">
-              <p className="font-semibold mb-1">Credenciales de prueba:</p>
+            <div className="mt-6 p-3 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60 backdrop-blur-sm">
+              <p className="font-semibold mb-1 text-white/80">Credenciales de prueba:</p>
               <p>Propietario: admin / admin123</p>
               <p>Recepcionista: recepcion / recepcion123</p>
             </div>
