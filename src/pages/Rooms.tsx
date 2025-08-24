@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +32,7 @@ interface Room {
 
 const Rooms: React.FC = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   
   // Generate 100 rooms with mock data
   const [rooms, setRooms] = useState<Room[]>(() => {
@@ -148,11 +150,13 @@ const Rooms: React.FC = () => {
           </div>
         )}
 
-        {room.status === 'occupied' && (
-          <div className="flex gap-2 pt-2">
+        {/* Action buttons for all rooms */}
+        <div className="grid grid-cols-2 gap-2 pt-2">
+          {/* Check-in/Check-out buttons */}
+          {room.status === 'available' ? (
             <Dialog>
               <DialogTrigger asChild>
-                <Button size="sm" variant="outline" className="flex-1 border-white/30 text-white hover:bg-white/20">
+                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white border-0">
                   <CheckCircle className="w-3 h-3 mr-1" />
                   Check-in
                 </Button>
@@ -167,49 +171,50 @@ const Rooms: React.FC = () => {
                 <CheckIn roomNumber={room.number} onUpdate={handleRoomUpdate} />
               </DialogContent>
             </Dialog>
-
+          ) : (
             <Button 
               size="sm" 
-              variant="outline" 
-              className="border-white/30 text-white hover:bg-white/20"
+              className="bg-red-600 hover:bg-red-700 text-white border-0"
               onClick={() => handleRoomUpdate(room.number, 'available')}
             >
               <XCircle className="w-3 h-3 mr-1" />
               Check-out
             </Button>
+          )}
 
+          {/* Invoice button for occupied rooms */}
+          {room.status === 'occupied' ? (
             <Button 
               size="sm" 
-              variant="outline" 
-              className="border-white/30 text-white hover:bg-white/20"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-0"
               onClick={() => window.open('https://ekuatia.set.gov.py/ekuatiai', '_blank')}
             >
               <Receipt className="w-3 h-3 mr-1" />
               Factura
               <ExternalLink className="w-3 h-3 ml-1" />
             </Button>
-          </div>
-        )}
+          ) : (
+            <Button 
+              size="sm" 
+              className="bg-green-600 hover:bg-green-700 text-white border-0"
+              onClick={() => navigate('/maintenance')}
+            >
+              <AlertTriangle className="w-3 h-3 mr-1" />
+              Mantenimiento
+            </Button>
+          )}
 
-        {room.status === 'available' && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm" className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30">
-                <CheckCircle className="w-3 h-3 mr-1" />
-                {t('rooms.checkin')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>Check-in - Habitación {room.number}</DialogTitle>
-                <DialogDescription>
-                  Registro de nuevo huésped
-                </DialogDescription>
-              </DialogHeader>
-              <CheckIn roomNumber={room.number} onUpdate={handleRoomUpdate} />
-            </DialogContent>
-          </Dialog>
-        )}
+          {/* Cleaning button */}
+          <Button 
+            size="sm" 
+            className="bg-yellow-600 hover:bg-yellow-700 text-white border-0 col-span-2"
+            onClick={() => navigate('/cleaning')}
+          >
+            <Sparkles className="w-3 h-3 mr-1" />
+            Limpieza
+          </Button>
+        </div>
+
       </CardContent>
     </Card>
   );
