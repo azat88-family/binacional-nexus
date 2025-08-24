@@ -109,7 +109,7 @@ const LoginPage: React.FC = () => {
                   placeholder={t('login.username')}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 backdrop-blur-sm"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/75 backdrop-blur-sm"
                   required
                 />
               </div>
@@ -122,7 +122,7 @@ const LoginPage: React.FC = () => {
                   placeholder={t('login.password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 backdrop-blur-sm"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/75 backdrop-blur-sm"
                   required
                 />
               </div>
