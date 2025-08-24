@@ -95,7 +95,7 @@ const translations: Translations = {
     
     // Sidebar
     'sidebar.dashboard': 'Painel de Controle',
-    'sidebar.rooms': 'Habitações',
+    'sidebar.rooms': 'Quartos',
     'sidebar.reservations': 'Reservas',
     'sidebar.maintenance': 'Manutenção',
     'sidebar.cleaning': 'Limpeza',
@@ -115,7 +115,7 @@ const translations: Translations = {
     'dashboard.occupied.rooms': 'Quartos Ocupados',
     
     // Rooms
-    'rooms.title': 'Gestão de Habitações',
+    'rooms.title': 'Gestão de Quartos',
     'rooms.checkin': 'Check-in',
     'rooms.checkout': 'Check-out',
     'rooms.invoice': 'Nota Fiscal',
@@ -167,7 +167,7 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('es');
+  const [language, setLanguage] = useState<Language>('pt');
 
   const t = (key: string): string => {
     return translations[language][key] || key;
