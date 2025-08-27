@@ -86,11 +86,11 @@ const LoginPage: React.FC = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="role" className="text-sm font-medium text-white">
+                <Label htmlFor="role" className="text-sm font-medium text-black">
                   Tipo de Usuario
                 </Label>
                 <Select value={role} onValueChange={(value: UserRole) => setRole(value)}>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm">
+                  <SelectTrigger className="bg-white/10 border-white/20 text-black backdrop-blur-sm">
                     <User className="w-4 h-4 mr-2" />
                     <SelectValue />
                   </SelectTrigger>
