@@ -35,7 +35,7 @@ const CurrencyWidget: React.FC = () => {
   }, []);
 
   return (
-    <Card className="currency-widget bg-gradient-to-br from-white/10 to-white/5 border-white/20">
+    <Card className="currency-widget bg-gradient-to-br from-black/30 to-white/5 border-white/20">
       <CardHeader className="pb-2">
         <CardTitle className="text-black text-sm flex items-center gap-2">
           <DollarSign className="w-4 h-4" />
