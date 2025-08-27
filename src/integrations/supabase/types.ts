@@ -14,16 +14,298 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cleaning_tasks: {
+        Row: {
+          assigned_to: string | null
+          checklist: Json | null
+          completed_date: string | null
+          created_at: string | null
+          created_by: string | null
+          estimated_duration: number | null
+          id: string
+          notes: string | null
+          room_id: string | null
+          scheduled_date: string | null
+          status: Database["public"]["Enums"]["task_status"] | null
+          task_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          checklist?: Json | null
+          completed_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          estimated_duration?: number | null
+          id?: string
+          notes?: string | null
+          room_id?: string | null
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["task_status"] | null
+          task_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          checklist?: Json | null
+          completed_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          estimated_duration?: number | null
+          id?: string
+          notes?: string | null
+          room_id?: string | null
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["task_status"] | null
+          task_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_tasks_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_date: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          estimated_duration: number | null
+          id: string
+          notes: string | null
+          priority: Database["public"]["Enums"]["task_priority"] | null
+          room_id: string | null
+          scheduled_date: string | null
+          status: Database["public"]["Enums"]["task_status"] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"] | null
+          room_id?: string | null
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["task_status"] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"] | null
+          room_id?: string | null
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["task_status"] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_tasks_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          approval_status: Database["public"]["Enums"]["approval_status"] | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"] | null
+          updated_at: string | null
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          approval_status?:
+            | Database["public"]["Enums"]["approval_status"]
+            | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          username: string
+        }
+        Update: {
+          approval_status?:
+            | Database["public"]["Enums"]["approval_status"]
+            | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
+      reservations: {
+        Row: {
+          adults: number | null
+          check_in_date: string
+          check_out_date: string
+          children: number | null
+          created_at: string | null
+          created_by: string | null
+          guest_document: string | null
+          guest_email: string | null
+          guest_name: string
+          guest_phone: string | null
+          id: string
+          notes: string | null
+          room_id: string | null
+          status: Database["public"]["Enums"]["reservation_status"] | null
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          adults?: number | null
+          check_in_date: string
+          check_out_date: string
+          children?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          guest_document?: string | null
+          guest_email?: string | null
+          guest_name: string
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          room_id?: string | null
+          status?: Database["public"]["Enums"]["reservation_status"] | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          adults?: number | null
+          check_in_date?: string
+          check_out_date?: string
+          children?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          guest_document?: string | null
+          guest_email?: string | null
+          guest_name?: string
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          room_id?: string | null
+          status?: Database["public"]["Enums"]["reservation_status"] | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          capacity: number | null
+          created_at: string | null
+          description: string | null
+          floor: number | null
+          id: string
+          price_per_night: number | null
+          room_number: string
+          room_type: Database["public"]["Enums"]["room_type"]
+          status: Database["public"]["Enums"]["room_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string | null
+          description?: string | null
+          floor?: number | null
+          id?: string
+          price_per_night?: number | null
+          room_number: string
+          room_type: Database["public"]["Enums"]["room_type"]
+          status?: Database["public"]["Enums"]["room_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string | null
+          description?: string | null
+          floor?: number | null
+          id?: string
+          price_per_night?: number | null
+          room_number?: string
+          room_type?: Database["public"]["Enums"]["room_type"]
+          status?: Database["public"]["Enums"]["room_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      is_user_approved: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      approval_status: "pending" | "approved" | "rejected"
+      reservation_status:
+        | "pending"
+        | "confirmed"
+        | "checked_in"
+        | "checked_out"
+        | "cancelled"
+      room_status: "available" | "occupied" | "maintenance" | "cleaning"
+      room_type: "single" | "double" | "suite" | "family"
+      task_priority: "low" | "medium" | "high" | "urgent"
+      task_status: "pending" | "in_progress" | "completed" | "cancelled"
+      user_role: "admin" | "attendant"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +432,20 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      approval_status: ["pending", "approved", "rejected"],
+      reservation_status: [
+        "pending",
+        "confirmed",
+        "checked_in",
+        "checked_out",
+        "cancelled",
+      ],
+      room_status: ["available", "occupied", "maintenance", "cleaning"],
+      room_type: ["single", "double", "suite", "family"],
+      task_priority: ["low", "medium", "high", "urgent"],
+      task_status: ["pending", "in_progress", "completed", "cancelled"],
+      user_role: ["admin", "attendant"],
+    },
   },
 } as const
