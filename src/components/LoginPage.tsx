@@ -94,7 +94,7 @@ const LoginPage: React.FC = () => {
                     <User className="w-4 h-4 mr-2" />
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-black/90 border-white/10 backdrop-blur-md">
+                  <SelectContent className="bg-black/90 border-red/10 backdrop-blur-md">
                     <SelectItem value="owner" className="text-white hover:bg-white/10">{t('login.owner')}</SelectItem>
                     <SelectItem value="attendant" className="text-white hover:bg-white/10">{t('login.attendant')}</SelectItem>
                   </SelectContent>
