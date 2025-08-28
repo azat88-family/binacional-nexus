@@ -11,12 +11,12 @@ import { useToast } from '@/hooks/use-toast';
 import hotelLobby from '@/assets/hotel-lobby.jpg';
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('owner');
+  const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login } = useAuth();
+  const { login, signUp } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const { toast } = useToast();
 
@@ -24,24 +24,25 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const success = await login(username, password, role);
-      if (!success) {
-        toast({
-          title: "Error de autenticación",
-          description: "Usuario o contraseña incorrectos",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+    const action = isSignUp ? signUp : login;
+    const { error } = await action(email, password);
+
+    if (error) {
       toast({
         title: "Error",
-        description: "Ocurrió un error durante el inicio de sesión",
+        description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+    } else if (isSignUp) {
+      toast({
+        title: "Revisa tu email",
+        description: "Se ha enviado un enlace de confirmación a tu correo electrónico.",
+      });
+      setIsSignUp(false); // Switch back to login view
     }
+    // On successful login, the onAuthStateChange listener in AuthContext will handle it.
+
+    setIsLoading(false);
   };
 
   return (
@@ -77,7 +78,7 @@ const LoginPage: React.FC = () => {
               <CardTitle className="text-2xl font-bold bg-gradient-to-r from-hotel-red to-hotel-navy bg-clip-text text-transparent">
                 {t('hotel.name')}
               </CardTitle>
-              <CardDescription className="text-black mt-2">
+              <CardDescription className="text-black/70 mt-2">
                 {t('login.subtitle')}
               </CardDescription>
             </div>
@@ -86,43 +87,27 @@ const LoginPage: React.FC = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="role" className="text-sm font-medium text-black">
-                  Tipo de Usuario
-                </Label>
-                <Select value={role} onValueChange={(value: UserRole) => setRole(value)}>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-black backdrop-blur-sm">
-                    <User className="w-4 h-4 mr-2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black/90 border-white/10 backdrop-blur-md">
-                    <SelectItem value="owner" className="text-black hover:bg-white/10">{t('login.owner')}</SelectItem>
-                    <SelectItem value="attendant" className="text-black hover:bg-white/10">{t('login.attendant')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-black">{t('login.username')}</Label>
+                <Label htmlFor="email" className="text-white">Email</Label>
                 <Input
-                  id="username"
-                  type="text"
-                  placeholder={t('login.username')}
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="bg-white/10 border-white/20 text-black placeholder:text-white/75 backdrop-blur-sm"
+                  id="email"
+                  type="email"
+                  placeholder="email@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/75 backdrop-blur-sm"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-black">{t('login.password')}</Label>
+                <Label htmlFor="password" className="text-white">{t('login.password')}</Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder={t('login.password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-white/10 border-white/20 text-black placeholder:text-white/75 backdrop-blur-sm"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/75 backdrop-blur-sm"
                   required
                 />
               </div>
@@ -133,15 +118,24 @@ const LoginPage: React.FC = () => {
                 disabled={isLoading}
               >
                 <Lock className="w-4 h-4 mr-2" />
-                {isLoading ? 'Iniciando...' : t('login.button')}
+                {isLoading
+                  ? 'Processando...'
+                  : (isSignUp ? 'Cadastrar' : t('login.button'))
+                }
               </Button>
             </form>
 
-            {/* Demo credentials info */}
-            <div className="mt-6 p-3 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60 backdrop-blur-sm">
-              <p className="font-semibold mb-1 text-white/80">Credenciales de prueba:</p>
-              <p>Propietario: admin / admin123</p>
-              <p>Recepcionista: recepcion / recepcion123</p>
+            <div className="mt-4 text-center text-sm">
+              <span className="text-white/80">
+                {isSignUp ? 'Já tem uma conta?' : 'Não tem uma conta?'}
+              </span>
+              <Button
+                variant="link"
+                className="text-hotel-red font-bold"
+                onClick={() => setIsSignUp(!isSignUp)}
+              >
+                {isSignUp ? 'Entrar' : 'Cadastre-se'}
+              </Button>
             </div>
           </CardContent>
         </Card>
