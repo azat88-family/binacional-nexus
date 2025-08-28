@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRooms, checkoutRoom, checkInRoom } from "../lib/api";
+import { getRooms, checkoutRoom, checkInRoom, type RoomForDisplay } from "../lib/supabase-rooms";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -17,13 +17,7 @@ interface GuestInfo {
   notes?: string;
 }
 
-interface Room {
-  id: number;
-  number: number;
-  status: "available" | "occupied" | "maintenance" | "cleaning";
-  reminder?: { time: string } | null;
-  guest?: GuestInfo | null;
-}
+type Room = RoomForDisplay;
 
 export default function Rooms() {
   const { t } = useLanguage();
@@ -47,43 +41,22 @@ export default function Rooms() {
     }
   };
 
-  const handleCheckIn = async (roomId: number, guestData: any) => {
+  const handleCheckIn = async (roomId: string, guestData: any) => {
     try {
-      const apiGuestData = {
-        guestName: guestData.fullName,
-        guestCountry: guestData.country,
-        guestIdNumber: guestData.documentNumber,
-        guestPhotoUrl: guestData.photo,
-        guestBirthDate: null,
-        checkIn: guestData.checkInDate,
-        checkOut: guestData.checkOutDate,
-        reminder: guestData.notes,
-      };
-
-      const roomToUpdate = rooms.find(r => r.id === roomId);
-      if (roomToUpdate) {
-        await checkInRoom(roomId, { ...apiGuestData, number: roomToUpdate.number });
-        fetchRooms();
-        setSelectedRoom(null);
-      }
+      await checkInRoom(roomId, guestData);
+      fetchRooms();
+      setSelectedRoom(null);
     } catch (error) {
       console.error("Erro ao fazer check-in:", error);
     }
   };
 
-  const handleRoomUpdate = async (roomNumber: number, newStatus: Room["status"]) => {
+  const handleRoomUpdate = async (roomNumber: string, newStatus: Room["status"]) => {
     try {
       if (newStatus === "available") {
         await checkoutRoom(roomNumber);
+        fetchRooms();
       }
-
-      setRooms(prev =>
-        prev.map(room =>
-          room.number === roomNumber
-            ? { ...room, status: newStatus, guest: newStatus === "available" ? null : room.guest, reminder: newStatus === "available" ? null : room.reminder }
-            : room
-        )
-      );
     } catch (err) {
       console.error("Erro ao atualizar quarto:", err);
     }
@@ -128,7 +101,7 @@ export default function Rooms() {
     <Card className={`hotel-card ${getStatusColor(room.status)} text-white cursor-pointer`}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-bold">{room.number}</CardTitle>
+          <CardTitle className="text-lg font-bold">Quarto {room.number}</CardTitle>
           <div className="flex items-center gap-1">{getStatusIcon(room.status)}</div>
         </div>
         <Badge variant="outline" className="w-fit border-white/30 text-white">
@@ -162,18 +135,18 @@ export default function Rooms() {
                 <DialogTrigger asChild>
                   <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white border-0">
                     <CheckCircle className="w-3 h-3 mr-1" />
-                    {t('rooms.checkin')}
+                    Check-in
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl">
                   <DialogHeader>
-                    <DialogTitle>Check-in - Habitación {room.number}</DialogTitle>
+                    <DialogTitle>Check-in - Quarto {room.number}</DialogTitle>
                     <DialogDescription>
-                      Registro de nuevo huésped
+                      Registro de novo hóspede
                     </DialogDescription>
                   </DialogHeader>
                   <CheckIn
-                    roomNumber={String(room.number)}
+                    roomNumber={room.number}
                     onCheckIn={(guestData) => handleCheckIn(room.id, guestData)}
                     t={t}
                   />
@@ -232,7 +205,7 @@ export default function Rooms() {
       <h1 className="text-2xl font-bold mb-4">Gestão de Quartos</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {rooms.map(room => (
-          <RoomCard key={room.number} room={room} />
+          <RoomCard key={room.id} room={room} />
         ))}
       </div>
 
@@ -249,7 +222,7 @@ export default function Rooms() {
               </DialogDescription>
             </DialogHeader>
             <CheckIn
-              roomNumber={String(selectedRoom.number)}
+              roomNumber={selectedRoom.number}
               onCheckIn={(guestData) => handleCheckIn(selectedRoom.id, guestData)}
               t={t}
             />
