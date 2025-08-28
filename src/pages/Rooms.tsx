@@ -1,21 +1,13 @@
-feature/login-page-improvements
 import { useEffect, useState } from "react";
 import { getRooms, checkoutRoom, checkInRoom } from "../lib/api";
 import { useLanguage } from "@/contexts/LanguageContext";
-import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CheckIn } from "@/components/RoomActions";
-
-// Recriando RoomCard baseado no código antigo
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { User, Bed, AlertTriangle, Sparkles, Clock, CheckCircle, XCircle, Receipt, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface GuestInfo {
   name: string;
@@ -35,44 +27,10 @@ interface Room {
 
 export default function Rooms() {
   const { t } = useLanguage();
-  feature/login-page-improvements
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-
-  const handleCheckIn = async (roomId: number, guestData: any) => {
-    try {
-      const apiGuestData = {
-        guestName: guestData.fullName,
-        guestCountry: guestData.country,
-        guestIdNumber: guestData.documentNumber,
-        guestPhotoUrl: guestData.photo,
-        guestBirthDate: null, // Not in form
-        checkIn: guestData.checkInDate,
-        checkOut: guestData.checkOutDate,
-        reminder: guestData.notes,
-      };
-
-      // We also need to pass the room number to the API
-      const roomToUpdate = rooms.find(r => r.id === roomId);
-      if (roomToUpdate) {
-        await checkInRoom(roomId, { ...apiGuestData, number: roomToUpdate.number });
-        fetchRooms(); // Refetch rooms to see the update
-        setSelectedRoom(null); // Close the dialog
-      }
-    } catch (error) {
-      console.error("Erro ao fazer check-in:", error);
-    }
-  };
-  const navigate = useNavigate();
-  
-  // Generate 100 rooms with mock data
-  const [rooms, setRooms] = useState<Room[]>(() => {
-    const roomList: Room[] = [];
-    for (let i = 1; i <= 100; i++) {
-      const number = i.toString().padStart(3, '0');
-      let status: Room['status'] = 'available';
-      let guest;
 
   useEffect(() => {
     fetchRooms();
@@ -86,6 +44,30 @@ export default function Rooms() {
       console.error("Erro ao carregar quartos:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCheckIn = async (roomId: number, guestData: any) => {
+    try {
+      const apiGuestData = {
+        guestName: guestData.fullName,
+        guestCountry: guestData.country,
+        guestIdNumber: guestData.documentNumber,
+        guestPhotoUrl: guestData.photo,
+        guestBirthDate: null,
+        checkIn: guestData.checkInDate,
+        checkOut: guestData.checkOutDate,
+        reminder: guestData.notes,
+      };
+
+      const roomToUpdate = rooms.find(r => r.id === roomId);
+      if (roomToUpdate) {
+        await checkInRoom(roomId, { ...apiGuestData, number: roomToUpdate.number });
+        fetchRooms();
+        setSelectedRoom(null);
+      }
+    } catch (error) {
+      console.error("Erro ao fazer check-in:", error);
     }
   };
 
@@ -172,102 +154,73 @@ export default function Rooms() {
             )}
           </div>
         )}
- feature/login-page-improvements
-        <div className="grid grid-cols-2 gap-2 pt-2">
-          {room.status === "available" ? (
-            <Button
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white border-0"
-              onClick={() => setSelectedRoom(room)}
-            >
-              <CheckCircle className="w-3 h-3 mr-1" />
-              {t('rooms.checkin')}
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              className="bg-red-600 hover:bg-red-700 text-white border-0"
-              onClick={() => handleRoomUpdate(room.number, "available")}
-        {/* Action buttons for all rooms */}
-        <div className="grid grid-cols-2 gap-2 pt-2">
-          {/* Check-in/Check-out buttons */}
-          {room.status === 'available' ? (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white border-0">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Check-in
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl">
-                <DialogHeader>
-                  <DialogTitle>Check-in - Habitación {room.number}</DialogTitle>
-                  <DialogDescription>
-                    Registro de nuevo huésped
-                  </DialogDescription>
-                </DialogHeader>
-                <CheckIn roomNumber={room.number} onUpdate={handleRoomUpdate} />
-              </DialogContent>
-            </Dialog>
-          ) : (
-            <Button 
-              size="sm" 
-              className="bg-red-600 hover:bg-red-700 text-white border-0"
-              onClick={() => handleRoomUpdate(room.number, 'available')}
-            >
-              <XCircle className="w-3 h-3 mr-1" />
-              Check-out
-            </Button>
-          )}
 
- feature/login-page-improvements
-          {room.status === "occupied" ? (
-            <Button
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white border-0"
-              onClick={() => window.open("https://ekuatia.set.gov.py/ekuatiai", "_blank")}
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            {room.status === 'available' ? (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white border-0">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    {t('rooms.checkin')}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle>Check-in - Habitación {room.number}</DialogTitle>
+                    <DialogDescription>
+                      Registro de nuevo huésped
+                    </DialogDescription>
+                  </DialogHeader>
+                  <CheckIn
+                    roomNumber={String(room.number)}
+                    onCheckIn={(guestData) => handleCheckIn(room.id, guestData)}
+                    t={t}
+                  />
+                </DialogContent>
+              </Dialog>
+            ) : (
+              <Button 
+                size="sm" 
+                className="bg-red-600 hover:bg-red-700 text-white border-0"
+                onClick={() => handleRoomUpdate(room.number, 'available')}
+              >
+                <XCircle className="w-3 h-3 mr-1" />
+                Check-out
+              </Button>
+            )}
 
-          {/* Invoice button for occupied rooms */}
-          {room.status === 'occupied' ? (
-            <Button 
-              size="sm" 
-              className="bg-blue-600 hover:bg-blue-700 text-white border-0"
-              onClick={() => window.open('https://ekuatia.set.gov.py/ekuatiai', '_blank')}
-            >
-              <Receipt className="w-3 h-3 mr-1" />
-              Factura
-              <ExternalLink className="w-3 h-3 ml-1" />
-            </Button>
-          ) : (
- feature/login-page-improvements
-            <Button
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white border-0"
-              onClick={() => alert("Função de manutenção")}
+            {room.status === 'occupied' ? (
+              <Button 
+                size="sm" 
+                className="bg-blue-600 hover:bg-blue-700 text-white border-0"
+                onClick={() => window.open('https://ekuatia.set.gov.py/ekuatiai', '_blank')}
+              >
+                <Receipt className="w-3 h-3 mr-1" />
+                Factura
+                <ExternalLink className="w-3 h-3 ml-1" />
+              </Button>
+            ) : (
+              <Button 
+                size="sm" 
+                className="bg-green-600 hover:bg-green-700 text-white border-0"
+                onClick={() => navigate('/maintenance')}
+              >
+                <AlertTriangle className="w-3 h-3 mr-1" />
+                Mantenimiento
+              </Button>
+            )}
+          </div>
 
-            <Button 
-              size="sm" 
-              className="bg-green-600 hover:bg-green-700 text-white border-0"
-              onClick={() => navigate('/maintenance')}
-            >
-              <AlertTriangle className="w-3 h-3 mr-1" />
-              Mantenimiento
-            </Button>
-          )} feature/login-page-improvements
-        </div>
-
-          {/* Cleaning button */}
           <Button 
             size="sm" 
-            className="bg-yellow-600 hover:bg-yellow-700 text-white border-0 col-span-2"
+            className="bg-yellow-600 hover:bg-yellow-700 text-white border-0 w-full"
             onClick={() => navigate('/cleaning')}
           >
             <Sparkles className="w-3 h-3 mr-1" />
             Limpieza
           </Button>
         </div>
-
-
       </CardContent>
     </Card>
   );

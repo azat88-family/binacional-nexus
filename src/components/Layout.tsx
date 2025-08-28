@@ -46,10 +46,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {/* User Info */}
               <div className="flex items-center gap-2 text-sm text-foreground">
                 <User className="w-4 h-4" />
-                <span>{t('status.welcome')}, {user?.username}</span>
-                <span className="text-xs px-2 py-1 bg-hotel-red/10 text-hotel-red rounded-full">
-                  {user?.role === 'owner' ? t('login.owner') : t('login.attendant')}
-                </span>
+                <span>{t('status.welcome')}, {user?.email}</span>
               </div>
 
               {/* Logout */}
