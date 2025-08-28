@@ -86,8 +86,25 @@ const LoginPage: React.FC = () => {
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-y-2"> feature/login-page-improvements
                 <Label htmlFor="email" className="text-white">Email</Label>
+                <Label htmlFor="role" className="text-sm font-medium text-black">
+                  Tipo de Usuario
+                </Label>
+                <Select value={role} onValueChange={(value: UserRole) => setRole(value)}>
+                  <SelectTrigger className="bg-white/10 border-white/20 text-black backdrop-blur-sm">
+                    <User className="w-4 h-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-black/90 border-red/10 backdrop-blur-md">
+                    <SelectItem value="owner" className="text-white hover:bg-red/10">{t('login.owner')}</SelectItem>
+                    <SelectItem value="attendant" className="text-white hover:bg-red/10">{t('login.attendant')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-white">{t('login.username')}</Label>
                 <Input
                   id="email"
                   type="email"

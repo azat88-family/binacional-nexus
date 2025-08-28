@@ -1,6 +1,13 @@
+feature/login-page-improvements
 import { useEffect, useState } from "react";
 import { getRooms, checkoutRoom, checkInRoom } from "../lib/api";
 import { useLanguage } from "@/contexts/LanguageContext";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CheckIn } from "@/components/RoomActions";
 
@@ -28,6 +35,7 @@ interface Room {
 
 export default function Rooms() {
   const { t } = useLanguage();
+  feature/login-page-improvements
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
@@ -56,6 +64,15 @@ export default function Rooms() {
       console.error("Erro ao fazer check-in:", error);
     }
   };
+  const navigate = useNavigate();
+  
+  // Generate 100 rooms with mock data
+  const [rooms, setRooms] = useState<Room[]>(() => {
+    const roomList: Room[] = [];
+    for (let i = 1; i <= 100; i++) {
+      const number = i.toString().padStart(3, '0');
+      let status: Room['status'] = 'available';
+      let guest;
 
   useEffect(() => {
     fetchRooms();
@@ -155,7 +172,7 @@ export default function Rooms() {
             )}
           </div>
         )}
-
+ feature/login-page-improvements
         <div className="grid grid-cols-2 gap-2 pt-2">
           {room.status === "available" ? (
             <Button
@@ -171,33 +188,86 @@ export default function Rooms() {
               size="sm"
               className="bg-red-600 hover:bg-red-700 text-white border-0"
               onClick={() => handleRoomUpdate(room.number, "available")}
+        {/* Action buttons for all rooms */}
+        <div className="grid grid-cols-2 gap-2 pt-2">
+          {/* Check-in/Check-out buttons */}
+          {room.status === 'available' ? (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white border-0">
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Check-in
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>Check-in - Habitación {room.number}</DialogTitle>
+                  <DialogDescription>
+                    Registro de nuevo huésped
+                  </DialogDescription>
+                </DialogHeader>
+                <CheckIn roomNumber={room.number} onUpdate={handleRoomUpdate} />
+              </DialogContent>
+            </Dialog>
+          ) : (
+            <Button 
+              size="sm" 
+              className="bg-red-600 hover:bg-red-700 text-white border-0"
+              onClick={() => handleRoomUpdate(room.number, 'available')}
             >
               <XCircle className="w-3 h-3 mr-1" />
               Check-out
             </Button>
           )}
 
+ feature/login-page-improvements
           {room.status === "occupied" ? (
             <Button
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 text-white border-0"
               onClick={() => window.open("https://ekuatia.set.gov.py/ekuatiai", "_blank")}
+
+          {/* Invoice button for occupied rooms */}
+          {room.status === 'occupied' ? (
+            <Button 
+              size="sm" 
+              className="bg-blue-600 hover:bg-blue-700 text-white border-0"
+              onClick={() => window.open('https://ekuatia.set.gov.py/ekuatiai', '_blank')}
             >
               <Receipt className="w-3 h-3 mr-1" />
               Factura
               <ExternalLink className="w-3 h-3 ml-1" />
             </Button>
           ) : (
+ feature/login-page-improvements
             <Button
               size="sm"
               className="bg-green-600 hover:bg-green-700 text-white border-0"
               onClick={() => alert("Função de manutenção")}
+
+            <Button 
+              size="sm" 
+              className="bg-green-600 hover:bg-green-700 text-white border-0"
+              onClick={() => navigate('/maintenance')}
             >
               <AlertTriangle className="w-3 h-3 mr-1" />
               Mantenimiento
             </Button>
-          )}
+          )} feature/login-page-improvements
         </div>
+
+          {/* Cleaning button */}
+          <Button 
+            size="sm" 
+            className="bg-yellow-600 hover:bg-yellow-700 text-white border-0 col-span-2"
+            onClick={() => navigate('/cleaning')}
+          >
+            <Sparkles className="w-3 h-3 mr-1" />
+            Limpieza
+          </Button>
+        </div>
+
+
       </CardContent>
     </Card>
   );

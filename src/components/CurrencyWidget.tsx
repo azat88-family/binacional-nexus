@@ -35,9 +35,9 @@ const CurrencyWidget: React.FC = () => {
   }, []);
 
   return (
-    <Card className="currency-widget bg-gradient-to-br from-white/10 to-white/5 border-white/20">
+    <Card className="currency-widget bg-gradient-to-br from-black/30 to-white/5 border-white/20">
       <CardHeader className="pb-2">
-        <CardTitle className="text-white text-sm flex items-center gap-2">
+        <CardTitle className="text-black text-sm flex items-center gap-2">
           <DollarSign className="w-4 h-4" />
           {t('currency.title')}
         </CardTitle>
@@ -49,7 +49,7 @@ const CurrencyWidget: React.FC = () => {
               <div className="font-medium">{rate.code}</div>
             </div>
             <div className="text-right">
-              <div className="text-white font-mono">
+              <div className="text-yellow font-mono">
                 {rate.code === 'PYG' 
                   ? rate.rate.toFixed(0) 
                   : rate.rate.toFixed(3)
@@ -67,8 +67,8 @@ const CurrencyWidget: React.FC = () => {
             </div>
           </div>
         ))}
-        <div className="pt-2 border-t border-white/20">
-          <div className="text-xs text-white/60 text-center">
+        <div className="pt-2 border-t border-black/20">
+          <div className="text-xs text-black/60 text-center">
             Base: 1 USD
           </div>
         </div>
