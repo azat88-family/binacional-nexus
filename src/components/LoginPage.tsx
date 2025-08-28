@@ -6,9 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Languages, Hotel, Lock, User } from 'lucide-react';
+import { Languages, Hotel, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import hotelLobby from '@/assets/hotel-lobby.jpg';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
