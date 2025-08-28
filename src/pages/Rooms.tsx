@@ -113,6 +113,9 @@ export default function Rooms() {
         {room.guest && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
+              {room.guest.photoUrl && (
+                <img src={room.guest.photoUrl} alt="Guest Photo" className="w-8 h-8 rounded-full object-cover" />
+              )}
               <User className="w-4 h-4" />
               <span className="text-sm font-medium">{room.guest.name}</span>
             </div>

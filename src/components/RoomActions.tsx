@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { supabase } from "../integrations/supabase/client";
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Upload, CreditCard, Smartphone, DollarSign, Save, X } from 'lucide-react';
+import { Camera, Upload, CreditCard, Smartphone, DollarSign, Save, X, Video, CameraOff } from 'lucide-react';
 
 interface CheckInProps {
   roomNumber: string;
@@ -48,24 +49,125 @@ export const CheckIn: React.FC<CheckInProps> = ({ roomNumber, onCheckIn, t }) =>
   const { toast } = useToast();
   
   const [guestData, setGuestData] = useState<GuestData>({
-    fullName: '',
-    address: '',
-    city: '',
-    state: '',
-    country: 'Paraguay',
-    documentNumber: '',
-    email: '',
-    phone: '',
+    fullName: "",
+    address: "",
+    city: "",
+    state: "",
+    country: "Paraguay",
+    documentNumber: "",
+    email: "",
+    phone: "",
     companions: 0,
     companionDetails: [],
-    paymentMethod: 'cash',
+    paymentMethod: "cash",
     paymentDetails: {},
-    notes: '',
-    checkInDate: new Date().toISOString().split('T')[0],
-    checkOutDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    notes: "",
+    checkInDate: new Date().toISOString().split("T")[0],
+    checkOutDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPhotoFile(file);
+      setPhotoPreview(URL.createObjectURL(file));
+      stopCamera();
+    } else {
+      setPhotoFile(null);
+      setPhotoPreview(null);
+    }
+  };
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.play();
+      }
+    } catch (err) {
+      console.error("Erro ao acessar a câmera:", err);
+      toast({
+        title: "Erro ao acessar a câmera",
+        description: "Verifique se você concedeu permissão para usar a câmera.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
+
+  const takePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext("2d");
+      if (context) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const file = new File([blob], `guest_photo_${Date.now()}.png`, { type: "image/png" });
+            setPhotoFile(file);
+            setPhotoPreview(URL.createObjectURL(file));
+            stopCamera();
+          }
+        }, "image/png");
+      }
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
+  const uploadPhoto = async (): Promise<string | undefined> => {
+    if (!photoFile) return undefined;
+
+    const fileExt = photoFile.name.split(".").pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `guest_photos/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from("guest-photos") // Certifique-se de que este bucket existe no Supabase
+      .upload(filePath, photoFile, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Erro ao fazer upload da foto:", error);
+      toast({
+        title: "Erro no upload da foto",
+        description: error.message,
+        variant: "destructive",
+      });
+      return undefined;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("guest-photos")
+      .getPublicUrl(filePath);
+
+    return publicUrlData.publicUrl;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -78,12 +180,21 @@ export const CheckIn: React.FC<CheckInProps> = ({ roomNumber, onCheckIn, t }) =>
       return;
     }
 
+    let photoUrl: string | undefined;
+    if (photoFile) {
+      photoUrl = await uploadPhoto();
+      if (!photoUrl) {
+        // Se o upload falhar, não prosseguir com o check-in
+        return;
+      }
+    }
+
     // Simulate saving to database
-    console.log('Guardando datos del huésped:', guestData);
+    console.log("Guardando datos del huésped:", guestData);
     
     onCheckIn({
       name: guestData.fullName,
-      photo: guestData.photo,
+      photo: photoUrl, // Passa a URL da foto
       checkIn: guestData.checkInDate,
       checkOut: guestData.checkOutDate,
       notes: guestData.notes,
@@ -101,9 +212,15 @@ export const CheckIn: React.FC<CheckInProps> = ({ roomNumber, onCheckIn, t }) =>
     if (guestData.companionDetails.length < 4) {
       setGuestData(prev => ({
         ...prev,
-        companionDetails: [...prev.companionDetails, { name: '', relationship: '' }]
+        companionDetails: [...prev.companionDetails, { name: "", relationship: "" }]
       }));
     }
+  };
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleDivClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -113,24 +230,70 @@ export const CheckIn: React.FC<CheckInProps> = ({ roomNumber, onCheckIn, t }) =>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Camera className="w-5 h-5" />
-            {t('form.guest.photo')}
+            {t("form.guest.photo")}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-muted-foreground rounded-lg cursor-pointer hover:border-hotel-red transition-colors">
-            <div className="text-center">
-              <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Subir foto</span>
+            <div className="flex flex-col items-center gap-4">
+              {photoPreview && (
+                <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground">
+                  <img src={photoPreview} alt="Guest Preview" className="w-full h-full object-cover" />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 h-auto"
+                    onClick={() => { setPhotoPreview(null); setPhotoFile(null); }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+
+              {!photoPreview && stream && (
+                <div className="relative w-64 h-48 bg-black rounded-lg overflow-hidden">
+                  <video ref={videoRef} className="w-full h-full object-cover"></video>
+                  <canvas ref={canvasRef} className="hidden"></canvas>
+                </div>
+              )}
+
+              <Input
+                id="guestPhoto"
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="hidden"
+                ref={fileInputRef}
+              />
+
+              <div className="flex gap-2">
+                <Button type="button" onClick={handleDivClick} className="flex items-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  Subir Foto
+                </Button>
+                <Button type="button" onClick={startCamera} className="flex items-center gap-2">
+                  <Video className="w-4 h-4" />
+                  Tirar Foto
+                </Button>
+                {stream && (
+                  <>
+                    <Button type="button" onClick={takePhoto} className="flex items-center gap-2">
+                      <Camera className="w-4 h-4" />
+                      Capturar
+                    </Button>
+                    <Button type="button" onClick={stopCamera} variant="outline" className="flex items-center gap-2">
+                      <CameraOff className="w-4 h-4" />
+                      Parar Câmera
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
       {/* Personal Information */}
       <Card>
-        <CardHeader>
-          <CardTitle>Información Personal</CardTitle>
-        </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="fullName">{t('form.full.name')} *</Label>
