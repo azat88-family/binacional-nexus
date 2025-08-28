@@ -1,58 +1,64 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '../lib/supabaseClient.js';
+import { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 
-export type UserRole = 'owner' | 'attendant';
-
-interface User {
-  id: string;
-  username: string;
-  role: UserRole;
-}
+// The user object from Supabase is more complex, but we can use the core User type.
+// The concept of 'owner'/'attendant' roles will need to be stored in your database,
+// for example, in a 'profiles' table linked to the user id.
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string, role: UserRole) => Promise<boolean>;
-  logout: () => void;
+  session: Session | null;
+  login: (email: string, password: string) => Promise<any>;
+  signUp: (email: string, password: string) => Promise<any>;
+  logout: () => Promise<any>;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Simplified authentication for demo
-const DEMO_USERS = {
-  owner: { username: 'admin', password: 'admin123' },
-  attendant: { username: 'recepcion', password: 'recepcion123' },
-};
-
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (username: string, password: string, role: UserRole): Promise<boolean> => {
-    const demoUser = DEMO_USERS[role];
-    
-    if (demoUser.username === username && demoUser.password === password) {
-      setUser({
-        id: role === 'owner' ? '1' : '2',
-        username,
-        role,
-      });
-      return true;
-    }
-    
-    return false;
+  useEffect(() => {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setUser(data.session?.user ?? null);
+      setLoading(false);
+    };
+
+    getSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, session: Session | null) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, []);
+
+  const value = {
+    user,
+    session,
+    login: (email, password) => supabase.auth.signInWithPassword({ email, password }),
+    signUp: (email, password) => supabase.auth.signUp({ email, password }),
+    logout: () => supabase.auth.signOut(),
+    isAuthenticated: !!user,
   };
 
-  const logout = () => {
-    setUser(null);
-  };
-
+  // We show a loading state while the initial session is being fetched.
+  // This prevents a flicker effect where the login page is shown for a second
+  // to an already logged-in user.
   return (
-    <AuthContext.Provider value={{
-      user,
-      login,
-      logout,
-      isAuthenticated: !!user,
-    }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

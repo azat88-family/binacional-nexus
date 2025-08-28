@@ -1,3 +1,7 @@
+feature/login-page-improvements
+import { useEffect, useState } from "react";
+import { getRooms, checkoutRoom, checkInRoom } from "../lib/api";
+import { useLanguage } from "@/contexts/LanguageContext";
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -5,33 +9,61 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CheckIn, CheckOut, Invoice } from '@/components/RoomActions';
-import { 
-  Bed, 
-  User, 
-  Clock,
-  ExternalLink,
-  CheckCircle,
-  XCircle,
-  Receipt,
-  AlertTriangle,
-  Sparkles
-} from 'lucide-react';
+import { CheckIn } from "@/components/RoomActions";
 
-interface Room {
-  number: string;
-  status: 'available' | 'occupied' | 'maintenance' | 'cleaning';
-  guest?: {
-    name: string;
-    photo?: string;
-    checkIn: string;
-    checkOut: string;
-    notes?: string;
-  };
+// Recriando RoomCard baseado no código antigo
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { User, Bed, AlertTriangle, Sparkles, Clock, CheckCircle, XCircle, Receipt, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface GuestInfo {
+  name: string;
+  photoUrl?: string;
+  checkInDate: string;
+  checkOutDate: string;
+  notes?: string;
 }
 
-const Rooms: React.FC = () => {
+interface Room {
+  id: number;
+  number: number;
+  status: "available" | "occupied" | "maintenance" | "cleaning";
+  reminder?: { time: string } | null;
+  guest?: GuestInfo | null;
+}
+
+export default function Rooms() {
   const { t } = useLanguage();
+  feature/login-page-improvements
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+
+  const handleCheckIn = async (roomId: number, guestData: any) => {
+    try {
+      const apiGuestData = {
+        guestName: guestData.fullName,
+        guestCountry: guestData.country,
+        guestIdNumber: guestData.documentNumber,
+        guestPhotoUrl: guestData.photo,
+        guestBirthDate: null, // Not in form
+        checkIn: guestData.checkInDate,
+        checkOut: guestData.checkOutDate,
+        reminder: guestData.notes,
+      };
+
+      // We also need to pass the room number to the API
+      const roomToUpdate = rooms.find(r => r.id === roomId);
+      if (roomToUpdate) {
+        await checkInRoom(roomId, { ...apiGuestData, number: roomToUpdate.number });
+        fetchRooms(); // Refetch rooms to see the update
+        setSelectedRoom(null); // Close the dialog
+      }
+    } catch (error) {
+      console.error("Erro ao fazer check-in:", error);
+    }
+  };
   const navigate = useNavigate();
   
   // Generate 100 rooms with mock data
@@ -42,95 +74,86 @@ const Rooms: React.FC = () => {
       let status: Room['status'] = 'available';
       let guest;
 
-      // Mock some occupied rooms
-      if (i <= 68) {
-        status = 'occupied';
-        guest = {
-          name: `Huésped ${i}`,
-          checkIn: '2024-01-15',
-          checkOut: '2024-01-20',
-          notes: i % 3 === 0 ? 'Despertar 7:00 AM' : undefined,
-        };
-      } else if (i <= 72) {
-        status = 'maintenance';
-      } else if (i <= 75) {
-        status = 'cleaning';
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  const fetchRooms = async () => {
+    try {
+      const data = await getRooms();
+      setRooms(data);
+    } catch (error) {
+      console.error("Erro ao carregar quartos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRoomUpdate = async (roomNumber: number, newStatus: Room["status"]) => {
+    try {
+      if (newStatus === "available") {
+        await checkoutRoom(roomNumber);
       }
 
-      roomList.push({ number, status, guest });
-    }
-    return roomList;
-  });
-
-  const getStatusColor = (status: Room['status']) => {
-    switch (status) {
-      case 'occupied':
-        return 'room-occupied';
-      case 'available':
-        return 'room-available';
-      case 'maintenance':
-        return 'room-maintenance';
-      case 'cleaning':
-        return 'room-cleaning';
-      default:
-        return 'bg-muted';
+      setRooms(prev =>
+        prev.map(room =>
+          room.number === roomNumber
+            ? { ...room, status: newStatus, guest: newStatus === "available" ? null : room.guest, reminder: newStatus === "available" ? null : room.reminder }
+            : room
+        )
+      );
+    } catch (err) {
+      console.error("Erro ao atualizar quarto:", err);
     }
   };
 
-  const getStatusIcon = (status: Room['status']) => {
+  const getStatusColor = (status: Room["status"]) => {
     switch (status) {
-      case 'occupied':
+      case "occupied":
+        return "room-occupied";
+      case "available":
+        return "room-available";
+      case "maintenance":
+        return "room-maintenance";
+      case "cleaning":
+        return "room-cleaning";
+      default:
+        return "bg-muted";
+    }
+  };
+
+  const getStatusIcon = (status: Room["status"]) => {
+    switch (status) {
+      case "occupied":
         return <User className="w-4 h-4" />;
-      case 'available':
+      case "available":
         return <Bed className="w-4 h-4" />;
-      case 'maintenance':
+      case "maintenance":
         return <AlertTriangle className="w-4 h-4" />;
-      case 'cleaning':
+      case "cleaning":
         return <Sparkles className="w-4 h-4" />;
-    }
-  };
-
-  const getStatusText = (status: Room['status']) => {
-    switch (status) {
-      case 'occupied':
-        return t('rooms.occupied');
-      case 'available':
-        return t('rooms.available');
-      case 'maintenance':
-        return t('rooms.maintenance');
-      case 'cleaning':
-        return t('rooms.cleaning');
       default:
-        return status;
+        return null;
     }
   };
 
-  const handleRoomUpdate = (roomNumber: string, newStatus: Room['status'], guestData?: any) => {
-    setRooms(prevRooms =>
-      prevRooms.map(room =>
-        room.number === roomNumber
-          ? { ...room, status: newStatus, guest: guestData }
-          : room
-      )
-    );
+  const getStatusText = (status: Room["status"]) => {
+    const key = `rooms.${status}`;
+    return t(key);
   };
 
-  const RoomCard: React.FC<{ room: Room }> = ({ room }) => (
+  const RoomCard = ({ room }: { room: Room }) => (
     <Card className={`hotel-card ${getStatusColor(room.status)} text-white cursor-pointer`}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-bold">
-            {room.number}
-          </CardTitle>
-          <div className="flex items-center gap-1">
-            {getStatusIcon(room.status)}
-          </div>
+          <CardTitle className="text-lg font-bold">{room.number}</CardTitle>
+          <div className="flex items-center gap-1">{getStatusIcon(room.status)}</div>
         </div>
         <Badge variant="outline" className="w-fit border-white/30 text-white">
           {getStatusText(room.status)}
         </Badge>
       </CardHeader>
-      
+
       <CardContent className="space-y-3">
         {room.guest && (
           <div className="space-y-2">
@@ -140,7 +163,7 @@ const Rooms: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 text-xs opacity-90">
               <Clock className="w-3 h-3" />
-              <span>Check-out: {room.guest.checkOut}</span>
+              <span>Check-out: {room.guest.checkOutDate}</span>
             </div>
             {room.guest.notes && (
               <div className="text-xs p-2 bg-white/10 rounded border border-white/20">
@@ -149,7 +172,22 @@ const Rooms: React.FC = () => {
             )}
           </div>
         )}
-
+ feature/login-page-improvements
+        <div className="grid grid-cols-2 gap-2 pt-2">
+          {room.status === "available" ? (
+            <Button
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white border-0"
+              onClick={() => setSelectedRoom(room)}
+            >
+              <CheckCircle className="w-3 h-3 mr-1" />
+              {t('rooms.checkin')}
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              className="bg-red-600 hover:bg-red-700 text-white border-0"
+              onClick={() => handleRoomUpdate(room.number, "available")}
         {/* Action buttons for all rooms */}
         <div className="grid grid-cols-2 gap-2 pt-2">
           {/* Check-in/Check-out buttons */}
@@ -182,6 +220,13 @@ const Rooms: React.FC = () => {
             </Button>
           )}
 
+ feature/login-page-improvements
+          {room.status === "occupied" ? (
+            <Button
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-0"
+              onClick={() => window.open("https://ekuatia.set.gov.py/ekuatiai", "_blank")}
+
           {/* Invoice button for occupied rooms */}
           {room.status === 'occupied' ? (
             <Button 
@@ -194,6 +239,12 @@ const Rooms: React.FC = () => {
               <ExternalLink className="w-3 h-3 ml-1" />
             </Button>
           ) : (
+ feature/login-page-improvements
+            <Button
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white border-0"
+              onClick={() => alert("Função de manutenção")}
+
             <Button 
               size="sm" 
               className="bg-green-600 hover:bg-green-700 text-white border-0"
@@ -202,7 +253,8 @@ const Rooms: React.FC = () => {
               <AlertTriangle className="w-3 h-3 mr-1" />
               Mantenimiento
             </Button>
-          )}
+          )} feature/login-page-improvements
+        </div>
 
           {/* Cleaning button */}
           <Button 
@@ -215,60 +267,42 @@ const Rooms: React.FC = () => {
           </Button>
         </div>
 
+
       </CardContent>
     </Card>
   );
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-hotel-red to-hotel-navy bg-clip-text text-transparent">
-            {t('rooms.title')}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gestión de las 100 habitaciones del hotel
-          </p>
-        </div>
-        
-        {/* Quick Stats */}
-        <div className="flex gap-4 text-sm">
-          <div className="text-center">
-            <div className="text-lg font-bold text-success">
-              {rooms.filter(r => r.status === 'available').length}
-            </div>
-            <div className="text-muted-foreground">Disponibles</div>
-          </div>
-          <div className="text-center">
-            <div className="text-lg font-bold text-hotel-red">
-              {rooms.filter(r => r.status === 'occupied').length}
-            </div>
-            <div className="text-muted-foreground">Ocupadas</div>
-          </div>
-          <div className="text-center">
-            <div className="text-lg font-bold text-warning">
-              {rooms.filter(r => r.status === 'maintenance').length}
-            </div>
-            <div className="text-muted-foreground">Mantenimiento</div>
-          </div>
-          <div className="text-center">
-            <div className="text-lg font-bold text-hotel-navy">
-              {rooms.filter(r => r.status === 'cleaning').length}
-            </div>
-            <div className="text-muted-foreground">Limpieza</div>
-          </div>
-        </div>
-      </div>
+  if (loading) return <p className="p-6 text-lg">Carregando quartos...</p>;
 
-      {/* Rooms Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {rooms.map((room) => (
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Gestão de Quartos</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {rooms.map(room => (
           <RoomCard key={room.number} room={room} />
         ))}
       </div>
+
+      {selectedRoom && (
+        <Dialog
+          open={!!selectedRoom}
+          onOpenChange={(isOpen) => !isOpen && setSelectedRoom(null)}
+        >
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Check-in - Quarto {selectedRoom.number}</DialogTitle>
+              <DialogDescription>
+                Registro de novo hóspede
+              </DialogDescription>
+            </DialogHeader>
+            <CheckIn
+              roomNumber={String(selectedRoom.number)}
+              onCheckIn={(guestData) => handleCheckIn(selectedRoom.id, guestData)}
+              t={t}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
-};
-
-export default Rooms;
+}

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +10,8 @@ import { Camera, Upload, CreditCard, Smartphone, DollarSign, Save, X } from 'luc
 
 interface CheckInProps {
   roomNumber: string;
-  onUpdate: (roomNumber: string, status: 'occupied', guestData: any) => void;
+  onCheckIn: (guestData: any) => void;
+  t: (key: string) => string;
 }
 
 interface GuestData {
@@ -44,8 +44,7 @@ interface GuestData {
   checkOutDate: string;
 }
 
-export const CheckIn: React.FC<CheckInProps> = ({ roomNumber, onUpdate }) => {
-  const { t } = useLanguage();
+export const CheckIn: React.FC<CheckInProps> = ({ roomNumber, onCheckIn, t }) => {
   const { toast } = useToast();
   
   const [guestData, setGuestData] = useState<GuestData>({
@@ -82,7 +81,7 @@ export const CheckIn: React.FC<CheckInProps> = ({ roomNumber, onUpdate }) => {
     // Simulate saving to database
     console.log('Guardando datos del huésped:', guestData);
     
-    onUpdate(roomNumber, 'occupied', {
+    onCheckIn({
       name: guestData.fullName,
       photo: guestData.photo,
       checkIn: guestData.checkInDate,
@@ -196,6 +195,15 @@ export const CheckIn: React.FC<CheckInProps> = ({ roomNumber, onUpdate }) => {
               id="state"
               value={guestData.state}
               onChange={(e) => setGuestData(prev => ({ ...prev, state: e.target.value }))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="country">{t('form.country')}</Label>
+            <Input
+              id="country"
+              value={guestData.country}
+              onChange={(e) => setGuestData(prev => ({ ...prev, country: e.target.value }))}
             />
           </div>
         </CardContent>
@@ -312,6 +320,44 @@ export const CheckIn: React.FC<CheckInProps> = ({ roomNumber, onUpdate }) => {
               </Select>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Companions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Acompanhantes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {guestData.companionDetails.map((companion, index) => (
+            <div key={index} className="grid grid-cols-2 gap-4 mb-4 p-4 border rounded-lg">
+              <div className="space-y-2">
+                <Label>Nome do Acompanhante</Label>
+                <Input
+                  value={companion.name}
+                  onChange={(e) => {
+                    const newCompanions = [...guestData.companionDetails];
+                    newCompanions[index].name = e.target.value;
+                    setGuestData(prev => ({ ...prev, companionDetails: newCompanions }));
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Parentesco</Label>
+                <Input
+                  value={companion.relationship}
+                  onChange={(e) => {
+                    const newCompanions = [...guestData.companionDetails];
+                    newCompanions[index].relationship = e.target.value;
+                    setGuestData(prev => ({ ...prev, companionDetails: newCompanions }));
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+          <Button type="button" variant="outline" onClick={addCompanion}>
+            Adicionar Acompanhante
+          </Button>
         </CardContent>
       </Card>
 
