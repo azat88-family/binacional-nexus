@@ -328,13 +328,13 @@ export type Database = {
     Functions: {
       checkin_room: {
         Args: {
-          check_in_date: string
-          check_out_date: string
-          guest_country: string
-          guest_id_number: string
+          check_in_date?: string
+          check_out_date?: string
+          guest_country?: string
+          guest_id_number?: string
           guest_name: string
-          guest_photo_url: string
-          notes: string
+          guest_photo_url?: string
+          notes?: string
           room_id: number
         }
         Returns: undefined
