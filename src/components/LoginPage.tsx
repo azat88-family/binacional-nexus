@@ -77,7 +77,7 @@ const LoginPage: React.FC = () => {
               <CardTitle className="text-2xl font-bold bg-gradient-to-r from-hotel-red to-hotel-navy bg-clip-text text-transparent">
                 {t('hotel.name')}
               </CardTitle>
-              <CardDescription className="text-white/70 mt-2">
+              <CardDescription className="text-black/70 mt-2">
                 {t('login.subtitle')}
               </CardDescription>
             </div>
