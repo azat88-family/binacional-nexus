@@ -65,7 +65,7 @@ export type Database = {
             foreignKeyName: "cleaning_tasks_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
-            referencedRelation: "rooms"
+            referencedRelation: "rooms_teste"
             referencedColumns: ["id"]
           },
         ]
@@ -124,7 +124,7 @@ export type Database = {
             foreignKeyName: "maintenance_tasks_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
-            referencedRelation: "rooms"
+            referencedRelation: "rooms_teste"
             referencedColumns: ["id"]
           },
         ]
@@ -235,12 +235,54 @@ export type Database = {
             foreignKeyName: "reservations_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
-            referencedRelation: "rooms"
+            referencedRelation: "rooms_teste"
             referencedColumns: ["id"]
           },
         ]
       }
       rooms: {
+        Row: {
+          checkin: string | null
+          checkout: string | null
+          created_at: string
+          guestcountry: string | null
+          guestidnumber: string | null
+          guestname: string | null
+          guestphotourl: string | null
+          id: number
+          number: number
+          reminder: string | null
+          status: string
+        }
+        Insert: {
+          checkin?: string | null
+          checkout?: string | null
+          created_at?: string
+          guestcountry?: string | null
+          guestidnumber?: string | null
+          guestname?: string | null
+          guestphotourl?: string | null
+          id?: number
+          number: number
+          reminder?: string | null
+          status?: string
+        }
+        Update: {
+          checkin?: string | null
+          checkout?: string | null
+          created_at?: string
+          guestcountry?: string | null
+          guestidnumber?: string | null
+          guestname?: string | null
+          guestphotourl?: string | null
+          id?: number
+          number?: number
+          reminder?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      rooms_teste: {
         Row: {
           capacity: number | null
           created_at: string | null
@@ -284,9 +326,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      checkin_room: {
+        Args: {
+          check_in_date: string
+          check_out_date: string
+          guest_country: string
+          guest_id_number: string
+          guest_name: string
+          guest_photo_url: string
+          notes: string
+          room_id: number
+        }
+        Returns: undefined
+      }
+      checkout_room: {
+        Args: { room_number: number }
+        Returns: undefined
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_rooms_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          checkin: string
+          checkout: string
+          guestname: string
+          guestphotourl: string
+          id: number
+          number: number
+          reminder: string
+          status: string
+        }[]
       }
       is_user_approved: {
         Args: Record<PropertyKey, never>
