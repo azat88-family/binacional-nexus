@@ -61,9 +61,8 @@ const AppSidebar: React.FC = () => {
     },
   ];
 
-  const visibleItems = menuItems.filter(item => 
-    user && item.roles.includes(user.role)
-  );
+  // For now, show all menu items since role system is not implemented yet
+  const visibleItems = menuItems;
 
   return (
     <Sidebar className="w-64 transition-all duration-300">

@@ -50,9 +50,10 @@ const Dashboard: React.FC = () => {
     trend?: number;
     showForOwnerOnly?: boolean;
   }> = ({ title, value, icon: Icon, description, trend, showForOwnerOnly = false }) => {
-    if (showForOwnerOnly && user?.role !== 'owner') {
-      return null;
-    }
+    // For now, show all metrics since role system is not implemented yet
+    // if (showForOwnerOnly && user?.role !== 'owner') {
+    //   return null;
+    // }
 
     return (
       <Card className="dashboard-card">
@@ -89,7 +90,7 @@ const Dashboard: React.FC = () => {
             {t('dashboard.title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {user?.role === 'owner' ? 'Vista completa del sistema' : 'Vista de recepción'}
+            Sistema de gestión hotelera
           </p>
         </div>
         <div className="text-right">
@@ -98,9 +99,8 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Financial Metrics - Owner Only */}
-      {user?.role === 'owner' && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Financial Metrics */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
             title={t('dashboard.daily.income')}
             value={formatCurrency(dashboardData.dailyIncome)}
@@ -130,7 +130,6 @@ const Dashboard: React.FC = () => {
             showForOwnerOnly
           />
         </div>
-      )}
 
       {/* Room Status - All Users */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
